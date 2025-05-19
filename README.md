@@ -8,8 +8,8 @@ We would like you to create a basic Laravel API called **“Laravel Tech Task De
 3. A secured URL is required to edit or delete a task. Provide the appropriate endpoints to do this when a task is created.
 4. No user accounts/ authentication is required.
 5. Should be a RESTful API with a base of: `/api/tasks`.
-6. Uses a NoSQL database (this is already setup).
-7. Appropriate Unit Tests.
+6. Uses a SQLite database (this is already setup).
+7. Appropriate Unit and/or Feature Tests.
 8. Uses Laravel Best Practices.
 
 ## Bonus Criteria:
