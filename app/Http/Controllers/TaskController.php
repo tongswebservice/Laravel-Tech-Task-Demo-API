@@ -53,8 +53,6 @@ class TaskController extends Controller
                 'status' => false,
                 'message' => 'Failed to store the task.',
             ], 500);
-
-            $logService->logResponse($response, $request, $e->getMessage());
         }
     }
 
