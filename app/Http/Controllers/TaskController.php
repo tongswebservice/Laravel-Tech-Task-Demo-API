@@ -37,7 +37,7 @@ class TaskController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreTaskRequest $request, StoreService $storeService, LogService $logService): JsonResponse
+    public function store(StoreTaskRequest $request, StoreService $storeService): JsonResponse
     {
         try {
             $data = $storeService($request->validated());
@@ -48,10 +48,9 @@ class TaskController extends Controller
                 'data' => $data
             ]);
         } catch (Exception $e) {
-
-            $response = response()->json([
+            return response()->json([
                 'status' => false,
-                'message' => 'Failed to store the task.',
+                'message' => "Failed to store the task. Error - $e->getMessage()",
             ], 500);
         }
     }
