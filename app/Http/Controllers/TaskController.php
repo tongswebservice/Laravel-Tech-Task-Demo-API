@@ -5,15 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
+use App\Http\Services\IndexService;
 
 class TaskController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(IndexService $indexService)
     {
-        //
+        return response()->json([
+            'message' => 'Successfully fetched the tasks.',
+            'data' => $indexService()
+        ]);
     }
 
     /**
