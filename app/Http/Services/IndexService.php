@@ -3,7 +3,6 @@
 namespace App\Http\Services;
 
 use App\Models\Task;
-use Illuminate\Support\Facades\Log;
 
 class IndexService
 {
