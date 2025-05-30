@@ -15,8 +15,24 @@ class LogService
             'method' => $request->method(),
             'url' => $request->fullUrl(),
             'ip' => $request->ip(),
-            'user_agent' => $request->userAgent()
+            'user_agent' => $request->userAgent(),
+            'request_data' => $this->getRequestPayload($request)
         ];
+    }
+
+    protected function getRequestPayload(Request $request)
+    {
+        // Skip for GET/HEAD/OPTIONS requests
+        if (in_array($request->method(), ['GET', 'HEAD', 'OPTIONS'])) {
+            return null;
+        }
+
+        // Handle JSON requests
+        if ($request->isJson()) {
+            $payload = $request->json()->all();
+        }
+
+        return $payload ?: null;
     }
 
     // log request data to log file 
@@ -30,11 +46,26 @@ class LogService
     }
 
     // log request response 
-    public function logResponse(mixed $response, Request $request): void
+    public function logResponse(mixed $response, Request $request, array $error): void
     {
-        $this->logRequest('log request response:', [
+        // response context
+        $context = [
             'status' => $response->status(),
             'url' => $request->fullUrl(),
-        ]);
+        ];
+
+        // check for error and append error to context if applicable
+        $hasError = false;
+
+        if ($error['has_error']) {
+            $hasError = true;
+            $context['error'] = $error;
+        }
+
+        // log context to log file
+        $this->logRequest(
+            $hasError ? 'Request failed' : 'Request completed',
+            $context
+        );
     }
 }

@@ -2,19 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
+use Illuminate\Http\JsonResponse;
 use App\Models\Task;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
+use App\Http\Services\LogService;
 use App\Http\Services\IndexService;
+use App\Http\Services\StoreService;
+
 
 class TaskController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(IndexService $indexService)
+    public function index(IndexService $indexService): JsonResponse
     {
         return response()->json([
+            'status' => true,
             'message' => 'Successfully fetched the tasks.',
             'data' => $indexService()
         ]);
@@ -31,9 +37,25 @@ class TaskController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreTaskRequest $request)
+    public function store(StoreTaskRequest $request, StoreService $storeService, LogService $logService): JsonResponse
     {
-        //
+        try {
+            $data = $storeService($request->validated());
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Successfully stored the task.',
+                'data' => $data
+            ]);
+        } catch (Exception $e) {
+
+            $response = response()->json([
+                'status' => false,
+                'message' => 'Failed to store the task.',
+            ], 500);
+
+            $logService->logResponse($response, $request, $e->getMessage());
+        }
     }
 
     /**
