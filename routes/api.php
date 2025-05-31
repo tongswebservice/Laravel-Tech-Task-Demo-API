@@ -14,5 +14,5 @@ Route::middleware([LogRequests::class])->group(function () {
     Route::resource('tasks', TaskController::class)->missing(function (Request $request) {
         $logService = new LogService();
         return $logService->logForMissingModelRequests($request);
-    })->withTrashed(['show']);
+    });
 });

@@ -74,28 +74,22 @@ class LogService
     }
 
     // check if request method is allowed for id lookup 
-    protected function getRequestMethod(Request $request): array
+    protected function getRequestMethod(Request $request): string
     {
         switch ($request->method()) {
             case "PATCH":
             case "PUT":
-                $methodAllowed = true;
                 $method = 'Update';
                 break;
             case "DELETE":
-                $methodAllowed = true;
                 $method = 'Delete';
                 break;
             default:
-                $methodAllowed = false;
                 $method = 'Fetch';
                 break;
         }
 
-        return [
-            'allowed' => $methodAllowed,
-            'method' => $method
-        ];
+        return $method;
     }
 
     // to log and return json response for mismatching ID
@@ -109,13 +103,8 @@ class LogService
         $id = $this->getModelIdFromUrlPath($request);
         $method = $this->getRequestMethod($request);
 
-        if (!$method['allowed']) {
-            return response()->json(['status' => true], 200);
-        }
-
-        // proceed with id lookup and render error for failed validation (if request method is allowed) 
-
-        $errorMessage = "Failed to ${method['method']} the task due to mismatching ID of ${id}";
+        // proceed with id lookup and render error for failed validation
+        $errorMessage = "Failed to ${method} the task due to mismatching ID of ${id}";
 
         Log::error('Request completed:', ['error' => $errorMessage]);
 
