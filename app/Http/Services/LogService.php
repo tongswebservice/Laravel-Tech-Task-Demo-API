@@ -20,11 +20,6 @@ class LogService
     // consolidate request payload
     public function prepareRequestData(Request $request): array
     {
-
-        $path = $request->path(); // "api/tasks/10"
-        $segments = explode('/', $path);
-        $id = end($segments); // "10"
-
         return [
             'method' => $request->method(),
             'url' => $request->fullUrl(),
