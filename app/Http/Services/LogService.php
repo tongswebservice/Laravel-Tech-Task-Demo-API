@@ -5,12 +5,26 @@ namespace App\Http\Services;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Exception;
+use Illuminate\Http\JsonResponse;
 
 class LogService
 {
+    // get model id from URL path
+    protected function getModelIdFromUrlPath(Request $request): string
+    {
+        $path = $request->path();
+        $segments = explode('/', $path);
+        return (string) end($segments);
+    }
+
     // consolidate request payload
     public function prepareRequestData(Request $request): array
     {
+
+        $path = $request->path(); // "api/tasks/10"
+        $segments = explode('/', $path);
+        $id = end($segments); // "10"
+
         return [
             'method' => $request->method(),
             'url' => $request->fullUrl(),
@@ -20,7 +34,8 @@ class LogService
         ];
     }
 
-    protected function getRequestPayload(Request $request)
+    // get request payload for GET/HEAD/OPTIONS requests 
+    protected function getRequestPayload(Request $request): ?array
     {
         // Skip for GET/HEAD/OPTIONS requests
         if (in_array($request->method(), ['GET', 'HEAD', 'OPTIONS'])) {
@@ -67,5 +82,23 @@ class LogService
             $hasError ? 'Request failed' : 'Request completed',
             $context
         );
+    }
+
+    // to log and return json response for mismatching ID
+    public function logForMissingModelRequests(Request $request): JsonResponse
+    {
+        // prepare and log incoming request
+        $requestPayload = $this->prepareRequestData($request);
+        $this->logRequest('log incoming request:', $requestPayload);
+
+        // get ID from path URL and log error 
+        $id = $this->getModelIdFromUrlPath($request);
+        Log::error('Request completed:', ['error' => "Failed to update the task due to mismatching ID of ${id}"]);
+
+        // return json response with error
+        return response()->json([
+            'status' => false,
+            'message' => "Failed to update the task due to mismatching ID of ${id}",
+        ], 500);
     }
 }

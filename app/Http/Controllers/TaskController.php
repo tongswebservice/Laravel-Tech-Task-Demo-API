@@ -7,9 +7,9 @@ use Illuminate\Http\JsonResponse;
 use App\Models\Task;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
-use App\Http\Services\LogService;
 use App\Http\Services\IndexService;
 use App\Http\Services\StoreService;
+use App\Http\Services\UpdateService;
 
 
 class TaskController extends Controller
@@ -74,9 +74,24 @@ class TaskController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateTaskRequest $request, Task $task)
+    public function update(UpdateTaskRequest $request, Task $task, UpdateService $updateService): JsonResponse
     {
-        //
+        try {
+            $updatedTask = $updateService($request->validated(), $task);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Successfully updated the task.',
+                'data' => $updatedTask
+            ]);
+        } catch (Exception $e) {
+            $response = response()->json([
+                'status' => false,
+                'message' => "Failed to update the task. Error - $e->getMessage()",
+            ], 500);
+
+            return $response;
+        }
     }
 
     /**
