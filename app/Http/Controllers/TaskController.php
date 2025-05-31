@@ -10,6 +10,7 @@ use App\Http\Requests\UpdateTaskRequest;
 use App\Http\Services\IndexService;
 use App\Http\Services\StoreService;
 use App\Http\Services\UpdateService;
+use App\Http\Services\DestroyService;
 
 
 class TaskController extends Controller
@@ -97,8 +98,13 @@ class TaskController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Task $task)
+    public function destroy(DestroyService $destroyService, Task $task): JsonResponse
     {
-        //
+        $destroyService($task);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Successfully deleted the task.',
+        ]);
     }
 }

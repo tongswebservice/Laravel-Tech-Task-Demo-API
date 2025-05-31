@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Http\Services\LogService;
+use Illuminate\Http\JsonResponse;
 
 class LogRequests
 {
@@ -30,9 +31,16 @@ class LogRequests
         // process middleware to return response object
         $response = $next($request);
 
-        // cast response object to array
-        $responseArray = $response->getData(true);
+        //initialise empty reponse array
+        $responseArray = [];
 
+        //cast response object to array for json response
+        if ($response instanceof JsonResponse) {
+            $responseArray = $response->getData(true);
+
+            // validating response checking for validation errors
+            $validatedResponse = $this->validateResponse($responseArray);
+        }
         // validating response checking for validation errors
         $validatedResponse = $this->validateResponse($responseArray);
 

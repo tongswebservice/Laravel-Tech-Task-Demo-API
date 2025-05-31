@@ -30,19 +30,13 @@ class LogService
     }
 
     // get request payload for GET/HEAD/OPTIONS requests 
-    protected function getRequestPayload(Request $request): ?array
+    protected function getRequestPayload(Request $request): array
     {
-        // Skip for GET/HEAD/OPTIONS requests
         if (in_array($request->method(), ['GET', 'HEAD', 'OPTIONS'])) {
-            return null;
+            return [];
         }
 
-        // Handle JSON requests
-        if ($request->isJson()) {
-            $payload = $request->json()->all();
-        }
-
-        return $payload ?: null;
+        return $request->json()->all() ?: [];
     }
 
     // log request data to log file 
@@ -79,6 +73,31 @@ class LogService
         );
     }
 
+    // check if request method is allowed for id lookup 
+    protected function getRequestMethod(Request $request): array
+    {
+        switch ($request->method()) {
+            case "PATCH":
+            case "PUT":
+                $methodAllowed = true;
+                $method = 'Update';
+                break;
+            case "DELETE":
+                $methodAllowed = true;
+                $method = 'Delete';
+                break;
+            default:
+                $methodAllowed = false;
+                $method = 'Fetch';
+                break;
+        }
+
+        return [
+            'allowed' => $methodAllowed,
+            'method' => $method
+        ];
+    }
+
     // to log and return json response for mismatching ID
     public function logForMissingModelRequests(Request $request): JsonResponse
     {
@@ -88,12 +107,21 @@ class LogService
 
         // get ID from path URL and log error 
         $id = $this->getModelIdFromUrlPath($request);
-        Log::error('Request completed:', ['error' => "Failed to update the task due to mismatching ID of ${id}"]);
+        $method = $this->getRequestMethod($request);
 
-        // return json response with error
+        if (!$method['allowed']) {
+            return response()->json(['status' => true], 200);
+        }
+
+        // proceed with id lookup and render error for failed validation (if request method is allowed) 
+
+        $errorMessage = "Failed to ${method['method']} the task due to mismatching ID of ${id}";
+
+        Log::error('Request completed:', ['error' => $errorMessage]);
+
         return response()->json([
             'status' => false,
-            'message' => "Failed to update the task due to mismatching ID of ${id}",
+            'message' => $errorMessage,
         ], 500);
     }
 }
