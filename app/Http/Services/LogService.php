@@ -10,7 +10,7 @@ use Illuminate\Http\JsonResponse;
 class LogService
 {
     // get model id from URL path
-    protected function getModelIdFromUrlPath(Request $request): string
+    public function getModelIdFromUrlPath(Request $request): string
     {
         $path = $request->path();
         $segments = explode('/', $path);
@@ -74,7 +74,7 @@ class LogService
     }
 
     // check if request method is allowed for id lookup 
-    protected function getRequestMethod(Request $request): string
+    public function getRequestMethod(Request $request): string
     {
         switch ($request->method()) {
             case "PATCH":
@@ -104,7 +104,7 @@ class LogService
         $method = $this->getRequestMethod($request);
 
         // proceed with id lookup and render error for failed validation
-        $errorMessage = "Failed to ${method} the task due to mismatching ID of ${id}";
+        $errorMessage = "Failed to {$method} the task due to mismatching ID of {$id}";
 
         Log::error('Request completed:', ['error' => $errorMessage]);
 
